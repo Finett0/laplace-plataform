@@ -10,12 +10,15 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
 
 export function resolveDatabaseUrl(): string | undefined {
-  return (
-    process.env.DATABASE_URL ??
-    process.env.DATABASE_POSTGRES_URL ?? // integração Vercel (prefixo DATABASE_)
-    process.env.POSTGRES_URL ??
-    process.env.DATABASE_PRISMA_DATABASE_URL
-  );
+  // Preferimos a conexão TCP direta. Aceitamos só `postgres://` padrão —
+  // rejeita `prisma+postgres://` (Accelerate), que o driver `pg` não consegue usar.
+  const candidates = [
+    process.env.DATABASE_POSTGRES_URL, // integração Vercel: conexão direta
+    process.env.POSTGRES_URL,
+    process.env.DATABASE_URL, // dev local (Docker) cai aqui
+    process.env.DATABASE_PRISMA_DATABASE_URL,
+  ];
+  return candidates.find((u) => u && /^postgres(ql)?:\/\//i.test(u));
 }
 
 /** Conexões remotas (não-localhost) exigem TLS. */
