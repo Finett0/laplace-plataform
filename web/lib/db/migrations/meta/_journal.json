@@ -15,6 +15,13 @@
       "when": 1781460769501,
       "tag": "0001_freezing_slapstick",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781466092431,
+      "tag": "0002_overconfident_iron_fist",
+      "breakpoints": true
     }
   ]
 }

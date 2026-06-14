@@ -9,6 +9,8 @@ import {
   text,
   uuid,
   timestamp,
+  integer,
+  jsonb,
   pgEnum,
   unique,
 } from "drizzle-orm/pg-core";
@@ -52,6 +54,32 @@ export const connectedChannels = pgTable(
       .defaultNow(),
   },
   (t) => [unique("uq_tenant_platform_handle").on(t.tenantId, t.platform, t.handle)],
+);
+
+/** Snapshot do PERFIL de cada canal, extraído da TikHub (camada 1). 1 linha = estado atual. */
+export const channelProfiles = pgTable(
+  "channel_profiles",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: text("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    channelId: uuid("channel_id")
+      .notNull()
+      .references(() => connectedChannels.id, { onDelete: "cascade" }),
+    platform: platformEnum("platform").notNull(),
+    externalId: text("external_id"), // id resolvido (UC…, urn, user_id)
+    displayName: text("display_name"),
+    headline: text("headline"), // bio / descrição / headline
+    followers: integer("followers"), // inscritos / seguidores
+    contentCount: integer("content_count"), // nº de vídeos / posts
+    avatarUrl: text("avatar_url"),
+    raw: jsonb("raw"), // resposta crua (ajuste de mapeamento depois)
+    fetchedAt: timestamp("fetched_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [unique("uq_profile_channel").on(t.channelId)],
 );
 
 export type Tenant = typeof tenants.$inferSelect;
