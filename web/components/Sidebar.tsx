@@ -72,18 +72,35 @@ function isActive(pathname: string, href: string) {
   return href === "/app" ? pathname === "/app" : pathname.startsWith(href);
 }
 
-export default function Sidebar({ authConfigured }: { authConfigured: boolean }) {
+export default function Sidebar({
+  authConfigured,
+  orgName,
+  orgInitials,
+  orgLogo,
+}: {
+  authConfigured: boolean;
+  orgName: string;
+  orgInitials: string;
+  orgLogo?: string | null;
+}) {
   const pathname = usePathname();
 
   return (
     <aside className="sticky top-0 flex h-screen w-[256px] flex-none flex-col gap-1 border-r border-border bg-surface px-3.5 py-4">
-      {/* marca */}
+      {/* marca = organização (tenant) atual */}
       <div className="flex items-center gap-2.5 px-2 pb-3.5 pt-1">
-        <span className="grid h-8 w-8 place-items-center rounded-[9px] bg-metal font-display text-[14px] font-bold text-white shadow-metal">
-          L
-        </span>
-        <span className="font-display text-[18px] font-bold tracking-tight text-ink">
-          laplace
+        {orgLogo ? (
+          <span className="h-8 w-8 flex-none overflow-hidden rounded-[9px] border border-border shadow-sm">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={orgLogo} alt="" className="h-full w-full object-cover" />
+          </span>
+        ) : (
+          <span className="grid h-8 w-8 flex-none place-items-center rounded-[9px] bg-metal font-display text-[13px] font-bold text-white shadow-metal">
+            {orgInitials}
+          </span>
+        )}
+        <span className="min-w-0 truncate font-display text-[18px] font-bold tracking-tight text-ink">
+          {orgName}
         </span>
       </div>
 

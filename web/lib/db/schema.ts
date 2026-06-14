@@ -29,6 +29,7 @@ export const tenants = pgTable("tenants", {
   id: text("id").primaryKey(), // ex.: org_UmSZGdvMWn4A0tpI
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
+  logoUrl: text("logo_url"), // data URL (MVP) ou URL de blob — logo do workspace
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
