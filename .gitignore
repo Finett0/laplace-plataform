@@ -1,0 +1,21 @@
+# dependências
+node_modules/
+
+# build / next
+.next/
+out/
+dist/
+*.tsbuildinfo
+
+# segredos / env (NUNCA commitar)
+.env
+.env.*
+!.env.example
+*.local
+
+# respostas cruas da TikHub (ecoam a API key)
+services/extraction/samples/
+
+# SO / editor
+.DS_Store
+*.log

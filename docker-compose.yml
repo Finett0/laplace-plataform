@@ -1,0 +1,23 @@
+# Postgres local para DEV (banco de metadados da app).
+# Em produção (Vercel) isto é trocado por Neon — mesmo Postgres, só muda a DATABASE_URL.
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: laplace-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: laplace
+      POSTGRES_PASSWORD: laplace
+      POSTGRES_DB: laplace
+    ports:
+      - "5432:5432"
+    volumes:
+      - laplace-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U laplace -d laplace"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  laplace-pgdata:

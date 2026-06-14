@@ -1,0 +1,137 @@
+/* ============================================================
+   LAPLACE — globals.css
+   Base branca · acento AZUL METÁLICO (variante B travada)
+   Tokens em :root · primitivas metálicas em @layer components
+   Doc: design/DESIGN.MD · Preview: design/metallic-blue.html
+   Fontes: carregadas via next/font em app/layout.tsx
+   (vars --font-display / --font-sans)
+   ============================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* — Neutros (base branca) — */
+  --canvas:    #f6f8fb;
+  --surface:   #ffffff;
+  --surface-2: #fbfcfe;
+  --border:    #e7ecf3;
+  --border-2:  #dce3ec;
+  --ink:       #0e1c2e;
+  --muted:     #5a6b80;
+  --faint:     #93a1b3;
+  --positive:  #0f9d6b;
+
+  /* — Rampa azul (a marca) — */
+  --steel-50:  #eef6fe;
+  --steel-100: #d8eafb;
+  --steel-200: #a9d1f6;
+  --steel-300: #6fb1ec;
+  --steel-400: #3f8fd6;
+  --steel-500: #2e74c0;
+  --steel-600: #1857a0; /* core */
+  --steel-700: #134273;
+  --steel-800: #0c2c4f;
+  --steel-900: #0a2440;
+
+  /* — Azul metálico — dimensão (topo/base) + matiz (sheen) — */
+  --sheen-top: rgba(255, 255, 255, 0.3);
+  --sheen-bot: rgba(0, 0, 0, 0.2);
+
+  --metal-a: linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,0) 40%, rgba(0,0,0,.16)),
+             linear-gradient(135deg, #0a2440 0%, #134273 42%, #1d5a98 50%, #134273 58%, #08203a 100%);
+  --metal-b: linear-gradient(180deg, var(--sheen-top), rgba(255,255,255,0) 38%, var(--sheen-bot)),
+             linear-gradient(135deg, #0c2c4f 0%, #1857a0 34%, #3f8fd6 50%, #1857a0 66%, #0a2440 100%);
+  --metal-c: linear-gradient(180deg, rgba(255,255,255,.42), rgba(255,255,255,0) 36%, rgba(0,0,0,.22)),
+             linear-gradient(135deg, #114a86 0%, #2e74c0 30%, #6fb1ec 50%, #2e74c0 70%, #0f3e72 100%);
+
+  /* ✦ Variante TRAVADA = B (trocar aqui propaga p/ todo o app) */
+  --metal: var(--metal-b);
+
+  /* wash metálico claro (chips ativos, fundos suaves) */
+  --metal-wash: linear-gradient(135deg, #eaf3fe 0%, #dcebfb 100%);
+
+  /* grão fino (brushed metal) — feTurbulence em data-uri */
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
+
+  /* — Sombras / raios / easing — */
+  --shadow-sm:    0 1px 2px rgba(13,30,52,.06), 0 1px 1px rgba(13,30,52,.04);
+  --shadow-md:    0 6px 20px -8px rgba(13,30,52,.18), 0 2px 6px rgba(13,30,52,.06);
+  --shadow-metal: 0 8px 22px -8px rgba(16,72,140,.55), inset 0 1px 0 rgba(255,255,255,.35);
+  --ease: cubic-bezier(.22, .61, .36, 1);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background:
+      radial-gradient(1200px 600px at 88% -10%, #eaf2fd 0%, transparent 55%),
+      var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans), "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "tnum" 1, "cv05" 1;
+  }
+}
+
+@layer components {
+  /* Superfície metálica completa: gradiente + grão + sombra. */
+  .metal {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--metal);
+    box-shadow: var(--shadow-metal);
+    color: #fff;
+  }
+  .metal::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: var(--grain);
+    mix-blend-mode: overlay;
+    opacity: 0.45;
+  }
+
+  /* Sweep de luz no hover (aplicar junto de .metal). */
+  .metal-sheen::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 55%;
+    left: -70%;
+    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.6) 50%, transparent 70%);
+    transition: left 0.6s var(--ease);
+    pointer-events: none;
+  }
+  .metal-sheen:hover::after {
+    left: 130%;
+  }
+}
+
+@layer utilities {
+  /* Texto com a rampa azul (KPIs, wordmark). */
+  .text-metal {
+    background: linear-gradient(135deg, var(--steel-700), var(--steel-500));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Entrada escalonada. */
+  .animate-rise {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: rise 0.6s var(--ease) forwards;
+  }
+  @keyframes rise {
+    to { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .animate-rise { animation: none; opacity: 1; transform: none; }
+  }
+}

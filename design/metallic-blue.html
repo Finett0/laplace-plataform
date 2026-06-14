@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Laplace · Calibração do azul metálico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   LAPLACE — DESIGN TOKENS (calibração do azul metálico)
+   Base branca · acento azul metálico (sheen + grão fino)
+   ============================================================ */
+:root{
+  /* — Neutros (base branca, calma) — */
+  --canvas:      #F6F8FB;   /* fundo do app            */
+  --surface:     #FFFFFF;   /* cards / sidebar         */
+  --surface-2:   #FBFCFE;   /* sub-superfície          */
+  --border:      #E7ECF3;   /* divisórias / contornos  */
+  --border-2:    #DCE3EC;   /* contorno mais marcado   */
+  --ink:         #0E1C2E;   /* texto forte             */
+  --muted:       #5A6B80;   /* texto secundário        */
+  --faint:       #93A1B3;   /* texto terciário / caps  */
+
+  /* — Rampa azul metálico (a marca) — */
+  --steel-900:   #0A2440;   /* navy profundo           */
+  --steel-800:   #0C2C4F;
+  --steel-700:   #134273;
+  --steel-600:   #1857A0;   /* core                    */
+  --steel-500:   #2E74C0;
+  --steel-400:   #3F8FD6;   /* azure                   */
+  --steel-300:   #6FB1EC;   /* highlight               */
+  --steel-200:   #A9D1F6;
+  --steel-100:   #D8EAFB;   /* chrome claro            */
+  --steel-50:    #EEF6FE;   /* wash                    */
+
+  /* — Superfícies metálicas (gradiente + dimensão) —
+     Variante B é o default. A=mais sóbrio, C=mais brilhante.
+     Troque --metal por --metal-a / --metal-b / --metal-c. */
+  --sheen-top:   rgba(255,255,255,.30);
+  --sheen-bot:   rgba(0,0,0,.20);
+
+  --metal-a:     linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,0) 40%, rgba(0,0,0,.16)),
+                 linear-gradient(135deg, #0a2440 0%, #134273 42%, #1d5a98 50%, #134273 58%, #08203a 100%);
+  --metal-b:     linear-gradient(180deg, var(--sheen-top), rgba(255,255,255,0) 38%, var(--sheen-bot)),
+                 linear-gradient(135deg, #0c2c4f 0%, #1857a0 34%, #3f8fd6 50%, #1857a0 66%, #0a2440 100%);
+  --metal-c:     linear-gradient(180deg, rgba(255,255,255,.42), rgba(255,255,255,0) 36%, rgba(0,0,0,.22)),
+                 linear-gradient(135deg, #114a86 0%, #2e74c0 30%, #6fb1ec 50%, #2e74c0 70%, #0f3e72 100%);
+  --metal:       var(--metal-b);
+
+  /* wash metálico claro (chips, ativos, fundos suaves) */
+  --metal-wash:  linear-gradient(135deg, #EAF3FE 0%, #DCEBFB 100%);
+
+  /* — Sombras — */
+  --shadow-sm:  0 1px 2px rgba(13,30,52,.06), 0 1px 1px rgba(13,30,52,.04);
+  --shadow-md:  0 6px 20px -8px rgba(13,30,52,.18), 0 2px 6px rgba(13,30,52,.06);
+  --shadow-metal: 0 8px 22px -8px rgba(16,72,140,.55), inset 0 1px 0 rgba(255,255,255,.35);
+
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 22px;
+  --ease: cubic-bezier(.22,.61,.36,1);
+
+  /* grão fino (brushed metal) — SVG feTurbulence em data-uri */
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
+}
+
+*{ box-sizing:border-box; margin:0; padding:0 }
+html{ -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility }
+body{
+  font-family:"Hanken Grotesk", sans-serif;
+  background:
+    radial-gradient(1200px 600px at 88% -10%, #EAF2FD 0%, transparent 55%),
+    var(--canvas);
+  color:var(--ink);
+  line-height:1.5;
+  font-feature-settings:"tnum" 1, "cv05" 1;
+}
+.font-display{ font-family:"Space Grotesk", sans-serif; letter-spacing:-.02em }
+.tnum{ font-variant-numeric:tabular-nums }
+
+/* ===== Layout shell (preview estilo lemlist) ===== */
+.app{ display:grid; grid-template-columns:264px 1fr; min-height:100vh }
+
+/* ---------- SIDEBAR ---------- */
+.side{
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  padding:18px 14px;
+  display:flex; flex-direction:column; gap:6px;
+  position:sticky; top:0; height:100vh;
+}
+.brand{ display:flex; align-items:center; gap:11px; padding:6px 8px 14px }
+.mark{
+  width:34px; height:34px; border-radius:10px; position:relative; overflow:hidden;
+  background:var(--metal); box-shadow:var(--shadow-metal); flex:none;
+}
+.mark::after{ content:""; position:absolute; inset:0; background-image:var(--grain); mix-blend-mode:overlay; opacity:.5 }
+.mark span{ position:absolute; inset:0; display:grid; place-items:center; color:#fff; font-weight:800; font-family:"Space Grotesk"; font-size:17px; text-shadow:0 1px 2px rgba(0,0,0,.4) }
+.brand .wm{ font-family:"Space Grotesk"; font-weight:800; font-size:19px; letter-spacing:-.02em }
+.brand .wm b{
+  background:linear-gradient(135deg, var(--steel-700), var(--steel-400) 55%, var(--steel-600));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+
+.search{
+  display:flex; align-items:center; gap:9px; margin:2px 4px 12px;
+  padding:9px 11px; border:1px solid var(--border-2); border-radius:var(--r-sm);
+  color:var(--faint); font-size:13.5px; background:var(--surface-2);
+}
+.search .kbd{ margin-left:auto; font-size:11px; color:var(--faint); border:1px solid var(--border-2); border-radius:5px; padding:1px 6px }
+
+.navgroup{ margin-top:10px }
+.navgroup h4{
+  font-size:11px; font-weight:600; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--faint); padding:6px 10px;
+}
+.nav{
+  display:flex; align-items:center; gap:11px;
+  padding:9px 11px; border-radius:var(--r-sm);
+  font-size:14px; font-weight:500; color:var(--muted);
+  cursor:pointer; transition:background .18s var(--ease), color .18s var(--ease);
+  position:relative;
+}
+.nav svg{ width:18px; height:18px; flex:none; stroke:currentColor; stroke-width:1.7; fill:none }
+.nav:hover{ background:var(--steel-50); color:var(--steel-700) }
+.nav .badge{
+  margin-left:auto; font-size:11px; font-weight:700; color:#fff;
+  background:var(--metal); border-radius:999px; min-width:20px; height:20px;
+  display:grid; place-items:center; padding:0 6px; box-shadow:var(--shadow-sm);
+}
+.nav.active{
+  color:#fff; font-weight:600; background:var(--metal);
+  box-shadow:var(--shadow-metal); overflow:hidden;
+}
+.nav.active::after{ content:""; position:absolute; inset:0; background-image:var(--grain); mix-blend-mode:overlay; opacity:.35 }
+.nav.active .badge{ background:rgba(255,255,255,.22); box-shadow:none; backdrop-filter:blur(2px) }
+
+.side .spacer{ flex:1 }
+.userbox{ display:flex; align-items:center; gap:11px; padding:10px; border-top:1px solid var(--border); margin-top:6px }
+.avatar{ width:34px; height:34px; border-radius:50%; background:var(--metal); color:#fff; display:grid; place-items:center; font-weight:700; font-size:13px; box-shadow:var(--shadow-metal); flex:none }
+.userbox .nm{ font-size:13.5px; font-weight:600; line-height:1.2 }
+.userbox .role{ font-size:12px; color:var(--faint) }
+
+/* ---------- MAIN ---------- */
+main{ padding:34px 40px 64px; max-width:1080px }
+.eyebrow{ font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--steel-600); margin-bottom:8px }
+h1{ font-family:"Space Grotesk"; font-weight:800; font-size:34px; letter-spacing:-.025em; margin-bottom:6px }
+.lead{ color:var(--muted); font-size:15.5px; max-width:60ch; margin-bottom:36px }
+
+section{ margin-bottom:44px }
+.sec-title{ font-family:"Space Grotesk"; font-weight:700; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); margin-bottom:16px; display:flex; align-items:center; gap:10px }
+.sec-title::after{ content:""; flex:1; height:1px; background:var(--border) }
+
+/* palette */
+.ramp{ display:grid; grid-template-columns:repeat(10,1fr); border-radius:var(--r-md); overflow:hidden; box-shadow:var(--shadow-sm); border:1px solid var(--border) }
+.sw{ height:74px; display:flex; align-items:flex-end; padding:7px; font-size:10.5px; font-weight:600 }
+.neutrals{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px }
+.chipn{ display:flex; align-items:center; gap:9px; font-size:12.5px; color:var(--muted) }
+.chipn i{ width:22px; height:22px; border-radius:6px; border:1px solid var(--border-2); display:inline-block }
+
+/* metallic showcase */
+.metal-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px }
+.metal-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:20px; box-shadow:var(--shadow-sm) }
+.metal-card .tag{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); margin-bottom:14px }
+.slab{ height:96px; border-radius:var(--r-md); position:relative; overflow:hidden; box-shadow:var(--shadow-metal) }
+.slab::after{ content:""; position:absolute; inset:0; background-image:var(--grain); mix-blend-mode:overlay; opacity:.45 }
+.slab.a{ background:var(--metal-a) } .slab.b{ background:var(--metal-b) } .slab.c{ background:var(--metal-c) }
+.metal-card p{ font-size:12.5px; color:var(--muted); margin-top:12px }
+.metal-card code{ font-size:11px; color:var(--steel-700); background:var(--steel-50); padding:2px 6px; border-radius:5px }
+
+/* buttons */
+.row{ display:flex; gap:14px; flex-wrap:wrap; align-items:center }
+.btn{ font-family:inherit; font-size:14px; font-weight:600; border:0; cursor:pointer; border-radius:10px; padding:11px 20px; transition:transform .15s var(--ease), box-shadow .2s var(--ease) }
+.btn:active{ transform:translateY(1px) }
+.btn-primary{ color:#fff; background:var(--metal); box-shadow:var(--shadow-metal); position:relative; overflow:hidden; isolation:isolate }
+.btn-primary::before{ content:""; position:absolute; inset:0; background-image:var(--grain); mix-blend-mode:overlay; opacity:.3; z-index:-1 }
+.btn-primary::after{ /* sheen sweep no hover */
+  content:""; position:absolute; top:0; bottom:0; width:55%; left:-70%;
+  background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.6) 50%, transparent 70%);
+  transition:left .6s var(--ease);
+}
+.btn-primary:hover{ box-shadow:0 12px 28px -8px rgba(16,72,140,.6), inset 0 1px 0 rgba(255,255,255,.4) }
+.btn-primary:hover::after{ left:130% }
+.btn-secondary{ color:var(--steel-700); background:var(--surface); border:1px solid var(--border-2); box-shadow:var(--shadow-sm) }
+.btn-secondary:hover{ border-color:var(--steel-300); background:var(--steel-50) }
+.btn-ghost{ color:var(--muted); background:transparent }
+.btn-ghost:hover{ background:var(--steel-50); color:var(--steel-700) }
+.chip{ font-size:13px; font-weight:600; padding:8px 16px; border-radius:999px; border:1px solid var(--border-2); background:var(--surface); color:var(--muted); cursor:pointer }
+.chip.on{ color:var(--steel-700); border-color:transparent; background:var(--metal-wash) }
+
+/* sample cards */
+.cards{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px }
+.kpi{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:18px; box-shadow:var(--shadow-sm); position:relative; overflow:hidden }
+.kpi .lbl{ font-size:11.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--faint) }
+.kpi .val{ font-family:"Space Grotesk"; font-weight:800; font-size:30px; letter-spacing:-.02em; margin:8px 0 4px;
+  background:linear-gradient(135deg, var(--steel-700), var(--steel-500)); -webkit-background-clip:text; background-clip:text; color:transparent }
+.kpi .sub{ font-size:12px; color:var(--muted) }
+.kpi .delta{ font-size:12px; font-weight:700; color:#0f9d6b }
+.kpi .strip{ position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--metal) }
+
+.big-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r-xl); padding:24px; box-shadow:var(--shadow-md); margin-top:16px }
+.big-card .hd{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px }
+.big-card h3{ font-family:"Space Grotesk"; font-weight:700; font-size:18px }
+.big-card .mut{ font-size:13px; color:var(--muted) }
+.bars{ display:flex; align-items:flex-end; gap:14px; height:140px; margin-top:22px; padding:0 4px }
+.bar{ flex:1; border-radius:7px 7px 3px 3px; background:var(--metal); opacity:.92; box-shadow:inset 0 1px 0 rgba(255,255,255,.3); position:relative; overflow:hidden }
+.bar::after{ content:""; position:absolute; inset:0; background-image:var(--grain); mix-blend-mode:overlay; opacity:.3 }
+.bars .x{ display:flex }
+.axis{ display:flex; gap:14px; margin-top:8px; padding:0 4px; font-size:11px; color:var(--faint) }
+.axis span{ flex:1; text-align:center }
+
+/* prompt (home AI-first) */
+.prompt-wrap{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r-xl); box-shadow:var(--shadow-md); padding:18px 18px 16px }
+.prompt-wrap textarea{ width:100%; border:0; resize:none; font-family:inherit; font-size:15px; color:var(--ink); min-height:54px; outline:none; background:transparent }
+.prompt-wrap textarea::placeholder{ color:var(--faint) }
+.prompt-bar{ display:flex; align-items:center; justify-content:space-between; margin-top:6px }
+.send{ width:40px; height:40px; border-radius:11px; border:0; background:var(--metal); box-shadow:var(--shadow-metal); color:#fff; cursor:pointer; display:grid; place-items:center; position:relative; overflow:hidden }
+.send::after{ content:""; position:absolute; inset:0; background-image:var(--grain); mix-blend-mode:overlay; opacity:.3 }
+.send svg{ width:18px; height:18px; stroke:#fff; stroke-width:2; fill:none }
+
+/* entrada animada */
+.rise{ opacity:0; transform:translateY(10px); animation:rise .6s var(--ease) forwards }
+@keyframes rise{ to{ opacity:1; transform:none } }
+@media (prefers-reduced-motion:reduce){ .rise{ animation:none; opacity:1; transform:none } }
+
+.note{ font-size:12.5px; color:var(--muted); background:var(--steel-50); border:1px solid var(--steel-100); border-radius:var(--r-md); padding:12px 14px; margin-top:14px }
+.note b{ color:var(--steel-700) }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR (estilo lemlist, base branca) ============ -->
+  <aside class="side">
+    <div class="brand">
+      <div class="mark"><span>L</span></div>
+      <div class="wm">la<b>place</b></div>
+    </div>
+
+    <div class="search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+      Buscar qualquer coisa
+      <span class="kbd">⌘K</span>
+    </div>
+
+    <div class="navgroup">
+      <h4>Visão</h4>
+      <div class="nav active">
+        <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9h14v-9"/></svg>
+        Home <span class="badge">IA</span>
+      </div>
+      <div class="nav">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </div>
+    </div>
+
+    <div class="navgroup">
+      <h4>Inteligência</h4>
+      <div class="nav">
+        <svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="9" r="2.5"/><circle cx="9" cy="18" r="2.5"/><path d="M8 7.5 16 9M8 16l8-5"/></svg>
+        Grafo <span class="badge">23</span>
+      </div>
+      <div class="nav">
+        <svg viewBox="0 0 24 24"><path d="M16 18a4 4 0 0 0-8 0"/><circle cx="12" cy="9" r="3.5"/><path d="M4 19a6 6 0 0 1 4-5M20 19a6 6 0 0 0-4-5"/></svg>
+        Audiência
+      </div>
+      <div class="nav">
+        <svg viewBox="0 0 24 24"><path d="M4 17 9 11l4 4 7-8"/><path d="M14 7h6v6"/></svg>
+        Previsão <span class="badge">2</span>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="navgroup">
+      <div class="nav">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+        Configurações
+      </div>
+    </div>
+    <div class="userbox">
+      <div class="avatar">GF</div>
+      <div><div class="nm">Giovanni Finetto</div><div class="role">Admin · Laplace</div></div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main>
+    <div class="rise">
+      <div class="eyebrow">Design tokens · v0</div>
+      <h1 class="font-display">Azul metálico</h1>
+      <p class="lead">Base branca, calma e espaçada — e o azul como a única coisa que reluz. Sheen de metal escovado + grão fino, no espírito do dourado da Patagon, porém em azul. Calibre a intensidade nas variantes A · B · C abaixo.</p>
+    </div>
+
+    <!-- RAMPA -->
+    <section class="rise" style="animation-delay:.05s">
+      <div class="sec-title">Rampa da marca</div>
+      <div class="ramp">
+        <div class="sw" style="background:var(--steel-900); color:#cfe1f5">900</div>
+        <div class="sw" style="background:var(--steel-800); color:#cfe1f5">800</div>
+        <div class="sw" style="background:var(--steel-700); color:#dcebfb">700</div>
+        <div class="sw" style="background:var(--steel-600); color:#eaf3fe">600</div>
+        <div class="sw" style="background:var(--steel-500); color:#fff">500</div>
+        <div class="sw" style="background:var(--steel-400); color:#0a2440">400</div>
+        <div class="sw" style="background:var(--steel-300); color:#0a2440">300</div>
+        <div class="sw" style="background:var(--steel-200); color:#0a2440">200</div>
+        <div class="sw" style="background:var(--steel-100); color:#134273">100</div>
+        <div class="sw" style="background:var(--steel-50); color:#134273">50</div>
+      </div>
+      <div class="neutrals">
+        <div class="chipn"><i style="background:#F6F8FB"></i> canvas #F6F8FB</div>
+        <div class="chipn"><i style="background:#FFFFFF"></i> surface #FFFFFF</div>
+        <div class="chipn"><i style="background:#E7ECF3"></i> border #E7ECF3</div>
+        <div class="chipn"><i style="background:#0E1C2E"></i> ink #0E1C2E</div>
+        <div class="chipn"><i style="background:#5A6B80"></i> muted #5A6B80</div>
+        <div class="chipn"><i style="background:#93A1B3"></i> faint #93A1B3</div>
+      </div>
+    </section>
+
+    <!-- METÁLICO A/B/C -->
+    <section class="rise" style="animation-delay:.1s">
+      <div class="sec-title">Superfície metálica — escolha a intensidade</div>
+      <div class="metal-grid">
+        <div class="metal-card">
+          <div class="tag">Variante A · sóbria</div>
+          <div class="slab a"></div>
+          <p>Tonal estreito, navy. Mais corporativa e discreta. <code>--metal-a</code></p>
+        </div>
+        <div class="metal-card" style="outline:2px solid var(--steel-300); outline-offset:3px">
+          <div class="tag">Variante B · equilíbrio ✦ default</div>
+          <div class="slab b"></div>
+          <p>Sweep claro no meio, presença sem exagero. <code>--metal-b</code></p>
+        </div>
+        <div class="metal-card">
+          <div class="tag">Variante C · brilhante</div>
+          <div class="slab c"></div>
+          <p>Highlight forte, mais "chrome". Premium, chama atenção. <code>--metal-c</code></p>
+        </div>
+      </div>
+      <div class="note">Para trocar o default do app inteiro: mude <b>--metal</b> para <b>--metal-a</b>, <b>--metal-b</b> ou <b>--metal-c</b> em <code>:root</code>. Tudo (botões, sidebar ativa, badges, logo, barras) acompanha.</div>
+    </section>
+
+    <!-- BOTÕES -->
+    <section class="rise" style="animation-delay:.15s">
+      <div class="sec-title">Botões · passe o mouse no primário (sheen)</div>
+      <div class="row">
+        <button class="btn btn-primary">Gerar previsão</button>
+        <button class="btn btn-secondary">Exportar</button>
+        <button class="btn btn-ghost">Cancelar</button>
+        <span class="chip on">Performance</span>
+        <span class="chip">Outreach</span>
+        <span class="chip">Conteúdo</span>
+      </div>
+    </section>
+
+    <!-- HOME PROMPT -->
+    <section class="rise" style="animation-delay:.2s">
+      <div class="sec-title">Home AI-first</div>
+      <div class="prompt-wrap">
+        <textarea placeholder="Pergunte aos seus dados…  ex.: que tema do Spotify ainda não levei pro LinkedIn?"></textarea>
+        <div class="prompt-bar">
+          <button class="btn btn-ghost" style="padding:6px 10px; font-size:13px">Auto ⌄</button>
+          <button class="send" title="Enviar"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPIs -->
+    <section class="rise" style="animation-delay:.25s">
+      <div class="sec-title">Cards de métrica</div>
+      <div class="cards">
+        <div class="kpi"><span class="strip"></span><div class="lbl">Conteúdos</div><div class="val tnum">150</div><div class="sub">3 canais</div></div>
+        <div class="kpi"><span class="strip"></span><div class="lbl">Engajamento</div><div class="val tnum">30.936</div><div class="sub">curtidas + comentários</div></div>
+        <div class="kpi"><span class="strip"></span><div class="lbl">Alcance previsto</div><div class="val tnum">48,2k</div><div class="delta">▲ +12%</div></div>
+        <div class="kpi"><span class="strip"></span><div class="lbl">Super-fãs</div><div class="val tnum">1.263</div><div class="sub">conectores: 46</div></div>
+      </div>
+
+      <div class="big-card">
+        <div class="hd">
+          <div><h3 class="font-display">Engajamento por canal</h3><div class="mut">Soma mensal · dado público</div></div>
+          <div class="row"><span class="chip">Diário</span><span class="chip">Semanal</span><span class="chip on">Mensal</span></div>
+        </div>
+        <div class="bars">
+          <div class="bar" style="height:38%"></div><div class="bar" style="height:54%"></div>
+          <div class="bar" style="height:46%"></div><div class="bar" style="height:78%"></div>
+          <div class="bar" style="height:62%"></div><div class="bar" style="height:90%"></div>
+          <div class="bar" style="height:70%"></div><div class="bar" style="height:84%"></div>
+          <div class="bar" style="height:58%"></div><div class="bar" style="height:96%"></div>
+          <div class="bar" style="height:66%"></div><div class="bar" style="height:80%"></div>
+        </div>
+        <div class="axis"><span>jul</span><span>ago</span><span>set</span><span>out</span><span>nov</span><span>dez</span><span>jan</span><span>fev</span><span>mar</span><span>abr</span><span>mai</span><span>jun</span></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+</body>
+</html>
