@@ -2,7 +2,6 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import { PageHeader } from "@/components/ui";
 import type { ConnectedChannel } from "@/lib/db/schema";
 import { addChannel, removeChannel, toggleChannel } from "./actions";
 import { PLATFORMS, type Platform, type ActionResult } from "./platforms";
@@ -46,11 +45,13 @@ export default function ChannelsView({
   }, [state]);
 
   return (
-    <div className="mx-auto max-w-[920px] px-10 py-12">
-      <PageHeader
-        title="Canais"
-        subtitle={`Conecte os canais de ${tenantName} — o que a extração vai puxar.`}
-      />
+    <div>
+      <div className="mb-1 text-[14px] font-semibold text-ink">
+        Canais conectados
+      </div>
+      <div className="mb-4 text-[13px] text-muted">
+        Conecte os canais de {tenantName} — o que a extração vai puxar.
+      </div>
 
       {/* formulário de conexão */}
       <form

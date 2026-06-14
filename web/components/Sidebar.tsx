@@ -41,12 +41,6 @@ const I = {
       <path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" />
     </>
   ),
-  link: (
-    <>
-      <path d="M9 15 15 9" />
-      <path d="M11 6.5 13 4.5a4 4 0 0 1 6 6l-2 2M13 17.5l-2 2a4 4 0 0 1-6-6l2-2" />
-    </>
-  ),
 };
 
 const GROUPS: Group[] = [
@@ -55,7 +49,6 @@ const GROUPS: Group[] = [
     items: [
       { href: "/app", label: "Home", icon: I.home, badge: "IA" },
       { href: "/app/dashboard", label: "Dashboard", icon: I.grid },
-      { href: "/app/canais", label: "Canais", icon: I.link },
     ],
   },
   {

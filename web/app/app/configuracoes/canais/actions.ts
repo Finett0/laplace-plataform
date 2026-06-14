@@ -57,7 +57,7 @@ export async function addChannel(
   if (inserted.length === 0)
     return { ok: false, error: "Esse canal já está conectado." };
 
-  revalidatePath("/app/canais");
+  revalidatePath("/app/configuracoes/canais");
   return { ok: true };
 }
 
@@ -74,7 +74,7 @@ export async function removeChannel(formData: FormData): Promise<void> {
         eq(connectedChannels.tenantId, tenant.id), // isolamento por tenant
       ),
     );
-  revalidatePath("/app/canais");
+  revalidatePath("/app/configuracoes/canais");
 }
 
 export async function toggleChannel(formData: FormData): Promise<void> {
@@ -94,5 +94,5 @@ export async function toggleChannel(formData: FormData): Promise<void> {
         eq(connectedChannels.tenantId, tenant.id),
       ),
     );
-  revalidatePath("/app/canais");
+  revalidatePath("/app/configuracoes/canais");
 }
