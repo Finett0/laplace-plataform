@@ -13,11 +13,15 @@ function envLocal(key: string): string | undefined {
   return undefined;
 }
 
+const url = envLocal("DATABASE_URL")!;
+const remote = !/@(localhost|127\.0\.0\.1|db:)/.test(url ?? "");
+
 export default defineConfig({
   schema: "./lib/db/schema.ts",
   out: "./lib/db/migrations",
   dialect: "postgresql",
   dbCredentials: {
-    url: envLocal("DATABASE_URL")!,
+    url,
+    ...(remote ? { ssl: { rejectUnauthorized: false } } : {}),
   },
 });

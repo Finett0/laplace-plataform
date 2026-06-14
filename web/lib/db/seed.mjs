@@ -41,7 +41,11 @@ async function listOrgs(token) {
   return Array.isArray(data) ? data : data.organizations ?? [];
 }
 
-const pool = new Pool({ connectionString: DATABASE_URL });
+const remote = !/@(localhost|127\.0\.0\.1|db:)/.test(DATABASE_URL ?? "");
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+  ssl: remote ? { rejectUnauthorized: false } : undefined,
+});
 
 try {
   const orgs = await listOrgs(await mgmtToken());
